@@ -8,8 +8,8 @@ use std::{collections::HashMap, io::Write};
 
 // format code blocks contained in `data` and write full
 // output to the passed in writer.
-pub fn format<W: Write>(config: &Config, data: String, writer: W) {
-    let (blocks, map) = get_code_blocks(config, &data);
+pub fn format<W: Write>(config: &Config, data: &str, writer: W) {
+    let (blocks, map) = get_code_blocks(config, data);
 
     // spawn thread to run format command for each
     // language in the markdown data
@@ -84,4 +84,79 @@ fn get_code_blocks<'a>(
     }
 
     return (blocks, map);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_get_code_blocks() {
+        let config = Config::default();
+        let data = r#"
+            test markdown data
+
+            ```rust
+                fn testing(){}
+            ```
+        "#;
+        let (mut blocks, map) = get_code_blocks(&config, data);
+        assert_eq!(blocks.items.len(), 1);
+        assert_eq!(map.len(), 1);
+
+        let code = blocks.items[0].get_mut();
+        assert_eq!(code.start, 53);
+        assert_eq!(code.end, 96);
+    }
+
+    #[test]
+    fn test_format() {
+        let config = Config::default();
+        let data = r#"
+Cillum culpa aliquip non aute nostrud adipisicing.
+Qui irure ullamco anim est irure qui mollit amet irure fugiat consectetur tempor.
+
+```rust
+    fn testing(){ println!("test");}
+```
+
+Minim velit mollit Lorem ad. Esse minim sint aute ex proident. Quis ut excepteur do esse sint proident velit culpa tempor occaecat.
+Irure elit deserunt aute in. Elit dolore quis aliqua. Eu consectetur ipsum nostrud enim sunt excepteur voluptate qui aliqua nostrud aliqua irure amet esse.
+
+```zig
+fn test2() void { const num = 99; std.log.info("test: {}",.{num}); }
+```
+
+end
+"#;
+
+        let mut buff = Vec::new();
+        format(&config, data, &mut buff);
+        let output = String::from_utf8(buff).unwrap();
+        assert_eq!(
+            output,
+            r#"
+Cillum culpa aliquip non aute nostrud adipisicing.
+Qui irure ullamco anim est irure qui mollit amet irure fugiat consectetur tempor.
+
+```rust
+fn testing() {
+    println!("test");
+}
+```
+
+Minim velit mollit Lorem ad. Esse minim sint aute ex proident. Quis ut excepteur do esse sint proident velit culpa tempor occaecat.
+Irure elit deserunt aute in. Elit dolore quis aliqua. Eu consectetur ipsum nostrud enim sunt excepteur voluptate qui aliqua nostrud aliqua irure amet esse.
+
+```zig
+fn test2() void {
+    const num = 99;
+    std.log.info("test: {}", .{num});
+}
+```
+
+end
+"#
+        );
+    }
 }

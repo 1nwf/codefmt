@@ -29,7 +29,7 @@ fn main() {
     if args.stdin {
         let mut data = String::new();
         std::io::stdin().read_to_string(&mut data).unwrap();
-        format::format(&config, data, std::io::stdout());
+        format::format(&config, &data, std::io::stdout());
     } else {
         let files = args.files.unwrap();
         for file in files {
@@ -40,7 +40,7 @@ fn main() {
                 .unwrap();
             let mut buff = String::new();
             file.read_to_string(&mut buff).unwrap();
-            format::format(&config, buff, file);
+            format::format(&config, &buff, file);
         }
     }
 }
