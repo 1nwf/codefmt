@@ -1,0 +1,6 @@
+[aliases]
+rs = "rust"
+
+[languages]
+rust = { formatter = ["rustfmt"], comment_token = "//" }
+zig = { formatter = ["zig", "fmt", "--stdin"], comment_token = "//" }
