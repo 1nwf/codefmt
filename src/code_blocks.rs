@@ -6,6 +6,10 @@ use std::{
 
 use crate::config::LanguageConfig;
 
+// this is the separator that will be inserted in between
+// code blocks that share the same language.
+const SEP: &'static str = "__codefmt__\n";
+
 #[derive(Clone)]
 pub struct Language<'a> {
     name: &'a str,
@@ -29,10 +33,6 @@ impl<'a> Language<'a> {
         Self { name, cfg }
     }
 }
-
-// this is the separator that will be inserted in between
-// code blocks that share the same language.
-const SEP: &'static str = "__mdfmt__\n";
 
 #[derive(Debug)]
 pub struct Block<'a> {
