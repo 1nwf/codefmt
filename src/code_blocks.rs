@@ -8,7 +8,7 @@ use crate::config::LanguageConfig;
 
 #[derive(Clone)]
 pub struct Language<'a> {
-    name: String,
+    name: &'a str,
     cfg: &'a LanguageConfig,
 }
 
@@ -25,7 +25,7 @@ impl std::hash::Hash for Language<'_> {
 }
 
 impl<'a> Language<'a> {
-    pub fn new(name: String, cfg: &'a LanguageConfig) -> Self {
+    pub fn new(name: &'a str, cfg: &'a LanguageConfig) -> Self {
         Self { name, cfg }
     }
 }

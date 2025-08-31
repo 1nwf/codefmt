@@ -36,10 +36,10 @@ pub fn format<W: Write>(config: &Config, data: &str, writer: W) {
     writer.write_all(&data[start..].as_bytes()).unwrap();
 }
 
-fn get_code_blocks<'a, 'b>(
+fn get_code_blocks<'a>(
     data: &'a str,
-    config: &'b Config,
-) -> (Blocks<'a>, HashMap<Language<'b>, LangBlocks<'b>>) {
+    config: &'a Config,
+) -> (Blocks<'a>, HashMap<Language<'a>, LangBlocks<'a>>) {
     let mut blocks = Blocks::new();
     let mut map = HashMap::<Language, LangBlocks>::new();
 
@@ -71,8 +71,7 @@ fn get_code_blocks<'a, 'b>(
             continue;
         };
 
-        let language_name = String::from(&block_data[DELIM.len()..nl]);
-        let lang = Language::new(language_name, lang_cfg);
+        let lang = Language::new(&block_data[DELIM.len()..nl], lang_cfg);
 
         if let Some(lb) = map.get_mut(&lang) {
             lb.add(code, idx);
