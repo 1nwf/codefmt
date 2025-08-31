@@ -4,33 +4,29 @@ use crate::{
 };
 
 use memchr::memmem::Finder;
-use std::{cell::SyncUnsafeCell, collections::HashMap, io::Write};
+use std::{collections::HashMap, io::Write};
 
 // format code blocks contained in `data` and write full
 // output to the passed in writer.
 pub fn format<W: Write>(config: &Config, data: String, writer: W) {
     let (blocks, map) = get_code_blocks(config, &data);
 
-    // SAFETY: Each value in the map contains a Vec<BlockIdx>.
-    // The block indexes are guaranteed to be unique for each item in the map.
-    // As a result, it is safe to share a mutable reference across threads.
-    let mut block_items = SyncUnsafeCell::new(blocks.items);
-
+    // spawn thread to run format command for each
+    // language in the markdown data
     std::thread::scope(|s| {
         for (_, b) in map {
             s.spawn(|| {
                 let block = b;
-                let items = unsafe { &mut *block_items.get() };
-                block.format(items);
+                block.format(&blocks);
             });
         }
     });
 
     // write output to writer
-    let blocks = block_items.get_mut();
     let mut writer = std::io::BufWriter::new(writer);
     let mut start = 0;
-    for block in blocks {
+    for block in blocks.items {
+        let block = unsafe { &*block.get() };
         writer
             .write_all(&data[start..block.start].as_bytes())
             .unwrap();

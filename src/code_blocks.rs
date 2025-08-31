@@ -1,4 +1,5 @@
 use std::{
+    cell::UnsafeCell,
     io::Write,
     process::{Command, Stdio},
 };
@@ -66,7 +67,7 @@ impl LangBlocks {
     }
 
     // spawn language format command and update block data
-    pub fn format(&self, blocks: &mut [Block]) {
+    pub fn format(&self, blocks: &Blocks) {
         let args = &self.lang.cfg.formatter;
         let mut cmd = Command::new(&args[0])
             .args(&args[1..])
@@ -97,14 +98,17 @@ impl LangBlocks {
 
         let mut idx = 0;
         for data in iter.filter(|x| x.len() > 0) {
-            blocks[self.blocks[idx] as usize].data = data;
+            // SAFETY: Indices in each `LangBlock` object are guaranteed to be unique.
+            // As a result, this is safe because no two `LangBlock` instances will
+            // contain the same index into `Blocks` items.
+            unsafe { blocks.get_mut(self.blocks[idx]).data = data }
             idx += 1;
         }
     }
 }
 
 pub struct Blocks<'a> {
-    pub items: Vec<Block<'a>>,
+    pub items: Vec<UnsafeCell<Block<'a>>>,
 }
 
 impl<'a> Blocks<'a> {
@@ -114,7 +118,13 @@ impl<'a> Blocks<'a> {
 
     pub fn push(&mut self, block: Block<'a>) -> BlockIdx {
         let idx = self.items.len();
-        self.items.push(block);
+        self.items.push(UnsafeCell::new(block));
         idx as BlockIdx
     }
+
+    pub unsafe fn get_mut(&self, idx: BlockIdx) -> &mut Block<'a> {
+        unsafe { &mut *self.items[idx as usize].get() }
+    }
 }
+
+unsafe impl Sync for Blocks<'_> {}
