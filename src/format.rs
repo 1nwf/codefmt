@@ -9,7 +9,7 @@ use std::{collections::HashMap, io::Write};
 // format code blocks contained in `data` and write full
 // output to the passed in writer.
 pub fn format<W: Write>(config: &Config, data: &str, writer: W) {
-    let (blocks, map) = get_code_blocks(config, data);
+    let (blocks, map) = get_code_blocks(data, config);
 
     // spawn thread to run format command for each
     // language in the markdown data
@@ -36,10 +36,10 @@ pub fn format<W: Write>(config: &Config, data: &str, writer: W) {
     writer.write_all(&data[start..].as_bytes()).unwrap();
 }
 
-fn get_code_blocks<'a>(
-    config: &Config,
+fn get_code_blocks<'a, 'b>(
     data: &'a str,
-) -> (Blocks<'a>, HashMap<Language, LangBlocks>) {
+    config: &'b Config,
+) -> (Blocks<'a>, HashMap<Language<'b>, LangBlocks<'b>>) {
     let mut blocks = Blocks::new();
     let mut map = HashMap::<Language, LangBlocks>::new();
 
@@ -100,7 +100,7 @@ mod tests {
                 fn testing(){}
             ```
         "#;
-        let (mut blocks, map) = get_code_blocks(&config, data);
+        let (mut blocks, map) = get_code_blocks(data, &config);
         assert_eq!(blocks.items.len(), 1);
         assert_eq!(map.len(), 1);
 

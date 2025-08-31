@@ -18,17 +18,14 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn get_lang(&self, lang: &str) -> Option<LanguageConfig> {
-        self.languages
-            .get(lang)
-            .or_else(|| {
-                if let Some(alias) = self.aliases.get(lang) {
-                    self.languages.get(alias)
-                } else {
-                    None
-                }
-            })
-            .cloned()
+    pub fn get_lang(&self, lang: &str) -> Option<&LanguageConfig> {
+        self.languages.get(lang).or_else(|| {
+            if let Some(alias) = self.aliases.get(lang) {
+                self.languages.get(alias)
+            } else {
+                None
+            }
+        })
     }
 
     fn merge(&mut self, b: Config) {

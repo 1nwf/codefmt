@@ -7,25 +7,25 @@ use std::{
 use crate::config::LanguageConfig;
 
 #[derive(Clone)]
-pub struct Language {
+pub struct Language<'a> {
     name: String,
-    cfg: LanguageConfig,
+    cfg: &'a LanguageConfig,
 }
 
-impl PartialEq for Language {
+impl PartialEq for Language<'_> {
     fn eq(&self, other: &Self) -> bool {
         self.name == other.name
     }
 }
-impl Eq for Language {}
-impl std::hash::Hash for Language {
+impl Eq for Language<'_> {}
+impl std::hash::Hash for Language<'_> {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.name.hash(state);
     }
 }
 
-impl Language {
-    pub fn new(name: String, cfg: LanguageConfig) -> Self {
+impl<'a> Language<'a> {
+    pub fn new(name: String, cfg: &'a LanguageConfig) -> Self {
         Self { name, cfg }
     }
 }
@@ -43,14 +43,14 @@ pub struct Block<'a> {
 
 pub type BlockIdx = u16;
 
-pub struct LangBlocks {
-    pub lang: Language,
+pub struct LangBlocks<'a> {
+    pub lang: Language<'a>,
     pub blocks: Vec<BlockIdx>,
     pub joined_data: String,
 }
 
-impl LangBlocks {
-    pub fn new(lang: Language) -> Self {
+impl<'a> LangBlocks<'a> {
+    pub fn new(lang: Language<'a>) -> Self {
         Self {
             lang,
             blocks: Vec::new(),
