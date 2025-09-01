@@ -1,6 +1,6 @@
 use anyhow::Result;
 use serde::Deserialize;
-use std::{collections::HashMap, path::Path};
+use std::{collections::HashMap, path::PathBuf};
 
 const DEFAULT_CONFIG: &str = include_str!("../languages.toml");
 
@@ -41,16 +41,30 @@ impl Default for Config {
     }
 }
 
-pub fn get_config(path: Option<impl AsRef<Path>>) -> Result<Config> {
+pub fn get_config(path: Option<PathBuf>) -> Result<Config> {
+    let mut config_path = default_config_path();
+    if let Some(path) = path {
+        config_path = Some(path);
+    }
+
     let mut config = Config::default();
 
-    if let Some(path) = path {
+    if let Some(path) = config_path {
         let data = std::fs::read_to_string(path)?;
         let value: Config = toml::from_str(&data)?;
         config.merge(value);
     }
 
     Ok(config)
+}
+
+fn default_config_path() -> Option<PathBuf> {
+    let path = dirs::home_dir()?.join(".config/codefmt/config.toml");
+    let exists = std::fs::exists(&path).unwrap_or(false);
+    match exists {
+        true => Some(path),
+        false => None,
+    }
 }
 
 #[cfg(test)]
