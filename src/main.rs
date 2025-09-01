@@ -1,5 +1,3 @@
-#![feature(sync_unsafe_cell)]
-
 use std::{io::Read, path::PathBuf};
 
 mod code_blocks;
