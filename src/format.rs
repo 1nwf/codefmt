@@ -8,7 +8,7 @@ use std::{collections::HashMap, io::Write};
 
 // format code blocks contained in `data` and write full
 // output to the passed in writer.
-pub fn format<W: Write>(config: &Config, data: &str, writer: W) {
+pub fn format<W: Write>(config: &Config, data: &str, writer: W) -> std::io::Result<()> {
     let (blocks, map) = get_code_blocks(data, config);
 
     // spawn thread to run format command for each
@@ -27,13 +27,13 @@ pub fn format<W: Write>(config: &Config, data: &str, writer: W) {
     let mut start = 0;
     for block in blocks.items {
         let block = unsafe { &*block.get() };
-        writer
-            .write_all(&data[start..block.start].as_bytes())
-            .unwrap();
-        writer.write_all(&block.data.as_bytes()).unwrap();
+        writer.write_all(&data[start..block.start].as_bytes())?;
+        writer.write_all(&block.data.as_bytes())?;
         start = block.end;
     }
-    writer.write_all(&data[start..].as_bytes()).unwrap();
+    writer.write_all(&data[start..].as_bytes())?;
+
+    Ok(())
 }
 
 fn get_code_blocks<'a>(

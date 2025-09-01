@@ -27,18 +27,14 @@ fn main() {
     if args.stdin {
         let mut data = String::new();
         std::io::stdin().read_to_string(&mut data).unwrap();
-        format::format(&config, &data, std::io::stdout());
+        format::format(&config, &data, std::io::stdout()).unwrap();
     } else {
         let files = args.files.unwrap();
         for file in files {
-            let mut file = std::fs::OpenOptions::new()
-                .read(true)
-                .write(true)
-                .open(file)
-                .unwrap();
-            let mut buff = String::new();
-            file.read_to_string(&mut buff).unwrap();
-            format::format(&config, &buff, file);
+            let data = std::fs::read_to_string(&file).unwrap();
+            let mut buff = Vec::new();
+            format::format(&config, &data, &mut buff).unwrap();
+            std::fs::write(file, buff).unwrap();
         }
     }
 }
