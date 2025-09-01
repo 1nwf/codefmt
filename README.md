@@ -13,7 +13,7 @@ cargo install codefmt --locked
 ### Homebrew
 
 ```sh
-brew install codefmt
+brew install 1nwf/tap/codefmt
 ```
 
 ## How this formatter works?
