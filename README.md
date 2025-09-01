@@ -6,11 +6,15 @@ Markdown code block formatter.
 
 ### Cargo
 
-`cargo install codefmt --locked`
+```sh
+cargo install codefmt --locked
+```
 
 ### Homebrew
 
-`brew install codefmt`
+```sh
+brew install codefmt
+```
 
 ## How this formatter works?
 This formatter is optimized to be fast. Instead of naively spawning a child process to format each code block, it groups
