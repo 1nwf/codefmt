@@ -1,3 +1,4 @@
+use anyhow::{Context, Result};
 use std::{
     cell::UnsafeCell,
     io::Write,
@@ -67,22 +68,20 @@ impl<'a> LangBlocks<'a> {
     }
 
     // spawn language format command and update block data
-    pub fn format(&self, blocks: &Blocks) {
+    pub fn format(&self, blocks: &Blocks) -> Result<()> {
         let args = &self.lang.cfg.formatter;
         let mut cmd = Command::new(&args[0])
             .args(&args[1..])
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
-            .spawn()
-            .unwrap();
+            .spawn()?;
 
         cmd.stdin
             .as_mut()
-            .unwrap()
-            .write_all(self.joined_data.as_bytes())
-            .unwrap();
+            .context("unable to write to formatter stdin")?
+            .write_all(self.joined_data.as_bytes())?;
 
-        let output = cmd.wait_with_output().unwrap();
+        let output = cmd.wait_with_output()?;
 
         let mut buffer = [0u8; 24];
         let sep = {
@@ -93,7 +92,7 @@ impl<'a> LangBlocks<'a> {
             unsafe { str::from_utf8_unchecked(&buffer[0..SEP.len() + comment_token.len()]) }
         };
 
-        let stdout = String::from_utf8(output.stdout).unwrap().leak();
+        let stdout = String::from_utf8(output.stdout)?.leak();
         let iter = stdout.split(sep);
 
         let mut idx = 0;
@@ -104,6 +103,8 @@ impl<'a> LangBlocks<'a> {
             unsafe { blocks.get_mut(self.blocks[idx]).data = data }
             idx += 1;
         }
+
+        Ok(())
     }
 }
 

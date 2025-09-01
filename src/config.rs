@@ -1,3 +1,4 @@
+use anyhow::Result;
 use serde::Deserialize;
 use std::{collections::HashMap, path::Path};
 
@@ -40,14 +41,14 @@ impl Default for Config {
     }
 }
 
-pub fn get_config(path: Option<impl AsRef<Path>>) -> Config {
+pub fn get_config(path: Option<impl AsRef<Path>>) -> Result<Config> {
     let mut config = Config::default();
 
     if let Some(path) = path {
-        let data = std::fs::read_to_string(path).unwrap();
-        let value: Config = toml::from_str(&data).unwrap();
+        let data = std::fs::read_to_string(path)?;
+        let value: Config = toml::from_str(&data)?;
         config.merge(value);
     }
 
-    config
+    Ok(config)
 }

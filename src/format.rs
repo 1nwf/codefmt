@@ -17,7 +17,7 @@ pub fn format<W: Write>(config: &Config, data: &str, writer: W) -> std::io::Resu
         for (_, b) in map {
             s.spawn(|| {
                 let block = b;
-                block.format(&blocks);
+                block.format(&blocks).unwrap();
             });
         }
     });
@@ -130,7 +130,7 @@ end
 "#;
 
         let mut buff = Vec::new();
-        format(&config, data, &mut buff);
+        format(&config, data, &mut buff).unwrap();
         let output = String::from_utf8(buff).unwrap();
         assert_eq!(
             output,
