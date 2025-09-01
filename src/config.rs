@@ -52,3 +52,13 @@ pub fn get_config(path: Option<impl AsRef<Path>>) -> Result<Config> {
 
     Ok(config)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::Config;
+
+    #[test]
+    fn test_default_config() {
+        Config::default();
+    }
+}
